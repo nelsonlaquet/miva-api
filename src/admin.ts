@@ -41,7 +41,7 @@ export class MivaAdmin {
 				Password: this._config.password
 			})
 
-		const body = await response;
+		const body = await response
 		if (body.indexOf("Sign In") !== -1) {
 			this._loggerSignIn.error("Could not sign in: invalid username or password")
 			throw new Error("Could not sign in: invalid username or password")
