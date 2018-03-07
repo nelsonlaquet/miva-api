@@ -4,7 +4,10 @@
   "description": "A JavaScript API for interacting with the Miva E-Commerce platform.",
   "main": "bin/index.js",
   "types": "bin/index.d.ts",
-  "repository": "https://github.com/nelsonlaquet/miva-deployer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nelsonlaquet/miva-api"
+  },
   "scripts": {
     "prepare": "rimraf bin && tsc",
     "start": "rimraf bin && tsc -w",
@@ -26,5 +29,9 @@
     "request-promise-native": "^1.0.5",
     "shelljs": "^0.8.1",
     "tslib": "^1.9.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/nelsonlaquet/miva-api/issues"
+  },
+  "homepage": "https://github.com/nelsonlaquet/miva-api#readme"
 }
