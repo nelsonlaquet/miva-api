@@ -1,6 +1,6 @@
 {
   "name": "miva-api",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A JavaScript API for interacting with the Miva E-Commerce platform.",
   "main": "bin/index.js",
   "types": "bin/index.d.ts",
