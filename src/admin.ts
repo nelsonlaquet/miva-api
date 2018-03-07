@@ -77,11 +77,12 @@ export class MivaAdmin {
 					Tab: "",
 					Have_Fields: "",
 					Session_ID: this._sessionId,
+					Store_Code: this._config.storeCode,
 					FileUpload_Form: "MODS",
 					FileUpload_Field: "Module_Module",
 					FileUpload_Type: "Module",
 					FileUpload_Data: moduleCode,
-					FileUpload_Overwrite: "Yes",				
+					FileUpload_Overwrite: "Yes",
 					FileUpload_File: {
 						value: createReadStream(modulePath),
 						options: {

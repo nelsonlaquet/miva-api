@@ -1,3 +1,12 @@
+import {readFileSync, existsSync, readSync} from "fs"
+
+export interface ConfigOptions {
+	username: string
+	password: string
+	storeUrl: string
+	storeCode: string
+}
+
 export class Config {
 	public get username() { return this._username }
 	public get password() { return this._password }
@@ -9,11 +18,12 @@ export class Config {
 	private _storeUrl: string
 	private _storeCode: string
 
-	public constructor() {
+	public constructor(config: Partial<ConfigOptions>) {
 		this._username = ""
 		this._password = ""
 		this._storeUrl = ""
 		this._storeCode = "1111"
+		this.addObject(config)
 	}
 
 	public addEnv(prefix: string = "") {
@@ -22,5 +32,24 @@ export class Config {
 		this._storeUrl = process.env[prefix + "STORE_URL"] || this._storeUrl
 		this._storeCode = process.env[prefix + "STORE_CODE"] || this._storeUrl
 		return this
+	}
+
+	public addObject({username, password, storeUrl, storeCode}: Partial<ConfigOptions> = {}) {
+		this._username = username || this._username
+		this._password = password || this._password
+		this._storeUrl = storeUrl || this._storeUrl
+		this._storeCode = storeCode || this._storeCode
+		return this
+	}
+
+	public addFile(file: string, isRequired: boolean = true) {
+		if (!existsSync(file)) {
+			if (isRequired)
+				throw new Error(`Can't read from file "${file}, it doesn't exist!"`)
+
+			return this
+		}
+		
+		return this.addObject(JSON.parse(readFileSync(file).toString()))
 	}
 }
