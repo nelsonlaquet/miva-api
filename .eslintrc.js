@@ -1,0 +1,1 @@
+module.exports = require("@nelsonlaquet/linters/.eslintrc.json")
