@@ -1,0 +1,1 @@
+export function MMScreen_LoadFinished(callback: (() => void))
