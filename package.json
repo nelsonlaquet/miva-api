@@ -16,7 +16,7 @@
   "author": "Nelson LaQuet",
   "license": "ISC",
   "devDependencies": {
-    "@nelsonlaquet/linters": "^1.0.0",
+    "@nelsonlaquet/linters": "^1.0.1",
     "@types/node": "^9.4.6",
     "@types/request": "^2.47.0",
     "@types/request-promise-native": "^1.0.14",
