@@ -5,6 +5,7 @@ import {dirname} from "path"
 export interface CompilerOptions {
 	inFile: string
 	outFile: string
+	builtinsDir: string
 }
 
 export enum CompilerErrorType {
@@ -22,6 +23,7 @@ export interface CompileError {
 	kind: CompilerErrorType.CompileError
 	options: CompilerOptions
 	files: CompileFiles
+	message: string
 }
 
 export interface CompileFiles {[file: string]: CompileErrorMessage[]}
@@ -54,10 +56,10 @@ export function parseMivaCompilerErrors(compilerOutput: string): CompileFiles {
 
 export class MivaCompiler {
 	public async compile(options: CompilerOptions) {
-		const {inFile, outFile} = options
+		const {inFile, outFile, builtinsDir} = options
 		return new Promise((resolve, reject) => {
 			mkdir("-p", dirname(outFile))
-			exec(`mvc.exe -o ${outFile} ${inFile}`, (err, stdout, stderr) => {
+			exec(`mvc.exe -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`, (err, stdout, stderr) => {
 				if (err) {
 					const out = stdout.toString()
 					const errorMessages = parseMivaCompilerErrors(stdout)
