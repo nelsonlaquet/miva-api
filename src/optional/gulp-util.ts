@@ -1,4 +1,4 @@
-let $ = null
+let $: any = null
 
 try {
 	$ = require("gulp-util")
