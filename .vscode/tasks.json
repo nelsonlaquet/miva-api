@@ -5,8 +5,8 @@
 	"tasks": [
 		{
 			"label": "Miva API: Watch",
-			"type": "npm",
-			"script": "start",
+			"type": "shell",
+			"command": "yarn start",
 			"problemMatcher": [
 				"$tsc-watch"
 			],
