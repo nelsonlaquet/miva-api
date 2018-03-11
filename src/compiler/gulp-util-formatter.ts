@@ -8,16 +8,19 @@ export default function format(error: CompileError) {
 				continue
 			
 			const errors = error.files[file]
-			$.log($.colors.bold("Error in"), $.colors.bgRed(file))
 			for (const errorItem of errors) {
-				$.log($.colors.bold(`(${errorItem.line}):`), $.colors.cyan(errorItem.code), $.colors.bgBlack(errorItem.message))
+				$.log(
+					$.colors.bold("Error in"), 
+					$.colors.bgRed(file), 
+					$.colors.bold(`(${errorItem.line}):`), 
+					$.colors.cyan(errorItem.code), 
+					$.colors.bgBlack(errorItem.message))
 			}
 		}
 
 		throw new $.PluginError("miva", `Failed to compile ${error.options.inFile}!`)
 	} else if (error.kind === CompilerErrorType.CompilerRunError) {
-		$.log($.colors.bold("Failed to compile"), $.colors.bgRed(error.options.inFile))
-		$.log($.colors.bgBlack(error.message))
+		$.log($.colors.bold("Failed to compile"), $.colors.bgRed(error.options.inFile), $.colors.bgBlack(error.message))
 		throw new $.PluginError("miva", `Failed to compile ${error.options.inFile}!`)
 	} else {
 		throw new $.PluginError("miva", error)

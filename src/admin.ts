@@ -1,9 +1,10 @@
 import { Config } from "./config"
 import {CookieJar, RequestAPI} from "request"
 import * as request from "request-promise-native"
-import {Logger} from "./logger"
+import { Logger, LogItem, LogItemType } from "./logger"
 import { createReadStream } from "fs"
 import { basename } from "path"
+import $ from "./optional/gulp-util"
 
 export class MivaAdmin {
 	public get logger() { return this._logger }
@@ -155,5 +156,17 @@ export class MivaAdmin {
 
 	private _getJsonUrl(func: string) {
 		return `${this._config.storeUrl}/mm5/json.mvc?Store_Code=&Function=${func}`
+	}
+}
+
+export function formatLog(logger: Logger, {type, message}: LogItem) {
+	if (type === LogItemType.Info) {
+		$.log($.colors.bgBlack(logger.fullName), message)
+	} else if (type === LogItemType.Warning) {
+		$.log($.colors.bgCyan(logger.fullName), message)
+	} else if (type === LogItemType.Error) {
+		$.log($.colors.bgRed(logger.fullName), message)
+	} else {
+		$.log(logger.fullName, message)
 	}
 }

@@ -3,8 +3,8 @@
 
 
 "@nelsonlaquet/linters@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@nelsonlaquet/linters/-/linters-1.0.1.tgz#ca92cb44584c6244b21c65deba5099f65978637d"
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@nelsonlaquet/linters/-/linters-1.0.2.tgz#d624a9388dcbd0227505db909e27ed51bbb2fe9c"
 
 "@types/caseless@*":
   version "0.12.1"
