@@ -6,6 +6,7 @@ export interface CompilerOptions {
 	inFile: string
 	outFile: string
 	builtinsDir: string
+	cwd: string
 }
 
 export enum CompilerErrorType {
@@ -56,35 +57,40 @@ export function parseMivaCompilerErrors(compilerOutput: string): CompileFiles {
 
 export class MivaCompiler {
 	public async compile(options: CompilerOptions) {
-		const {inFile, outFile, builtinsDir} = options
+		const {inFile, outFile, builtinsDir, cwd} = options
 		return new Promise((resolve, reject) => {
 			mkdir("-p", dirname(outFile))
-			exec(`mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`, (err, stdout, stderr) => {
-				if (err) {
-					const out = stdout.toString()
-					const errorMessages = parseMivaCompilerErrors(stdout)
+			exec(
+				`mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`,
+				{
+					...(cwd ? {cwd} : {})
+				},
+				(err, stdout, stderr) => {
+					if (err) {
+						const out = stdout.toString()
+						const errorMessages = parseMivaCompilerErrors(stdout)
 
-					if (Object.keys(errorMessages).length) {
-						// There was output, so the compiler ran and returned errors...
-						reject({
-							kind: CompilerErrorType.CompileError,
-							options,
-							files: errorMessages
-						})
-					} else {
-						// there was no output, so the compiler failed to run
-						reject({
-							kind: CompilerErrorType.CompilerRunError,
-							message: out || err,
-							options
-						})
+						if (Object.keys(errorMessages).length) {
+							// There was output, so the compiler ran and returned errors...
+							reject({
+								kind: CompilerErrorType.CompileError,
+								options,
+								files: errorMessages
+							})
+						} else {
+							// there was no output, so the compiler failed to run
+							reject({
+								kind: CompilerErrorType.CompilerRunError,
+								message: out || err,
+								options
+							})
+						}
+
+						return
 					}
 
-					return
-				}
-
-				resolve(stdout.toString())
-			})
+					resolve(stdout.toString())
+				})
 		})
 	}
 }
