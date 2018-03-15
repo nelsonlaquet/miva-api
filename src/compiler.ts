@@ -59,7 +59,7 @@ export class MivaCompiler {
 		const {inFile, outFile, builtinsDir} = options
 		return new Promise((resolve, reject) => {
 			mkdir("-p", dirname(outFile))
-			exec(`mvc.exe -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`, (err, stdout, stderr) => {
+			exec(`mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`, (err, stdout, stderr) => {
 				if (err) {
 					const out = stdout.toString()
 					const errorMessages = parseMivaCompilerErrors(stdout)
