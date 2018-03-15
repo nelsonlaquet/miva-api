@@ -1,6 +1,6 @@
 {
   "name": "miva-api",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A JavaScript API for interacting with the Miva E-Commerce platform.",
   "main": "bin/index.js",
   "types": "bin/index.d.ts",
@@ -17,7 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@nelsonlaquet/linters": "^1.0.1",
-    "@types/node": "^9.4.6",
+    "@types/node": "^9.4.7",
     "@types/request": "^2.47.0",
     "@types/request-promise-native": "^1.0.14",
     "@types/shelljs": "^0.7.8",
