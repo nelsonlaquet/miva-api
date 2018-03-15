@@ -1,6 +1,6 @@
 import {exec} from "child_process"
 import {mkdir} from "shelljs"
-import {dirname} from "path"
+import {dirname, join} from "path"
 
 export interface CompilerOptions {
 	inFile: string
@@ -59,7 +59,7 @@ export class MivaCompiler {
 	public async compile(options: CompilerOptions) {
 		const {inFile, outFile, builtinsDir, cwd} = options
 		return new Promise((resolve, reject) => {
-			mkdir("-p", dirname(outFile))
+			mkdir("-p", dirname(join(cwd, outFile)))
 			exec(
 				`mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`,
 				{
