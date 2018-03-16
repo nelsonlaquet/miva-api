@@ -1,6 +1,7 @@
 import {exec} from "child_process"
 import {mkdir} from "shelljs"
 import {dirname, join} from "path"
+import { Logger } from "./logger"
 
 export interface CompilerOptions {
 	inFile: string
@@ -56,10 +57,16 @@ export function parseMivaCompilerErrors(compilerOutput: string): CompileFiles {
 }
 
 export class MivaCompiler {
+	private readonly _logger: Logger
+	
+	public constructor(logger: Logger)  {
+		this._logger = logger.createLogger("MivaCompiler")
+	}
+	
 	public async compile(options: CompilerOptions) {
 		const {inFile, outFile, builtinsDir, cwd} = options
 		return new Promise((resolve, reject) => {
-			mkdir("-p", dirname(join(cwd, outFile)))
+			mkdir("-p", dirname(join(cwd || "./", outFile)))
 			exec(
 				`mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`,
 				{
@@ -72,18 +79,25 @@ export class MivaCompiler {
 
 						if (Object.keys(errorMessages).length) {
 							// There was output, so the compiler ran and returned errors...
-							reject({
+
+							const errorData = {
 								kind: CompilerErrorType.CompileError,
 								options,
 								files: errorMessages
-							})
+							}
+
+							this._logger.error(`Could not compile ${inFile}!`, errorData)
+							reject(errorData)
 						} else {
 							// there was no output, so the compiler failed to run
-							reject({
+							const errorData = {
 								kind: CompilerErrorType.CompilerRunError,
 								message: out || err,
 								options
-							})
+							}
+
+							this._logger.error(`Could not compile ${inFile}!`, errorData)
+							reject(errorData)
 						}
 
 						return

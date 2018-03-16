@@ -4,7 +4,6 @@ import * as request from "request-promise-native"
 import { Logger, LogItem, LogItemType } from "./logger"
 import { createReadStream } from "fs"
 import { basename } from "path"
-import $ from "./optional/gulp-util"
 
 export class MivaAdmin {
 	public get logger() { return this._logger }
@@ -130,17 +129,5 @@ export class MivaAdmin {
 
 	private _doJsonRequest(func: string, querystring: {[name: string]: string}, form: any) {
 		return this._doRequest(`/mm5/json.mvc?Function=${func}`, querystring, form)
-	}
-}
-
-export function formatLog(logger: Logger, {type, message}: LogItem) {
-	if (type === LogItemType.Info) {
-		$.log($.colors.bgBlack(logger.fullName), message)
-	} else if (type === LogItemType.Warning) {
-		$.log($.colors.bgCyan(logger.fullName), message)
-	} else if (type === LogItemType.Error) {
-		$.log($.colors.bgRed(logger.fullName), message)
-	} else {
-		$.log(logger.fullName, message)
 	}
 }
