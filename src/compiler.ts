@@ -1,7 +1,7 @@
 import {exec} from "child_process"
 import {mkdir} from "shelljs"
 import {dirname, join} from "path"
-import { Logger } from "./logger"
+import {Logger} from "./logger"
 
 export interface CompilerOptions {
 	inFile: string
@@ -66,9 +66,13 @@ export class MivaCompiler {
 	public async compile(options: CompilerOptions) {
 		const {inFile, outFile, builtinsDir, cwd} = options
 		return new Promise((resolve, reject) => {
+			const outDir = join(cwd || "./", dirname(outFile))
+			this._logger.info(`Creating directory ${outDir}...`)
 			mkdir("-p", dirname(join(cwd || "./", outFile)))
-			exec(
-				`mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`,
+
+			const command = `mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`
+			this._logger.info(`Running "${command}" in "${cwd || "./"}"...`)
+			exec(command,
 				{
 					...(cwd ? {cwd} : {})
 				},
@@ -103,6 +107,7 @@ export class MivaCompiler {
 						return
 					}
 
+					this._logger.info(stdout.toString())
 					resolve(stdout.toString())
 				})
 		})

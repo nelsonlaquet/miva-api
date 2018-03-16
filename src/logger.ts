@@ -48,12 +48,12 @@ export class Logger {
 		return new Logger(name, this)
 	}
 
-	public log(item: LogItem) {
+	public log(item: LogItem, from = this) {
 		for (const listener of this._listeners)
-			listener(this, item)
+			listener(from, item)
 
 		if (this.parent)
-			this.parent.log(item)
+			this.parent.log(item, from)
 	}
 
 	public info(message: string, error?: any) {
@@ -70,6 +70,33 @@ export class Logger {
 }
 
 export function formatLog(logger: Logger, {type, message, error}: LogItem) {
+	if (error && error.kind) {
+		if (error.kind === CompilerErrorType.CompileError) {
+			const {files, options} = error as CompileError
+			for (const file in files) {
+				if (!error.files.hasOwnProperty(file))
+					continue
+				
+				const errors = files[file]
+				for (const errorItem of errors) {
+					$.log(
+						$.colors.bold("Error in"), 
+						$.colors.bgRed(file), 
+						$.colors.bold(`(${errorItem.line}):`), 
+						$.colors.cyan(errorItem.code), 
+						$.colors.bgBlack(errorItem.message))
+				}
+			}
+	
+			$.log($.colors.bold("Failed to compile"), $.colors.bgRed(options.inFile), $.colors.bgBlack(message))
+		} else if (error.kind === CompilerErrorType.CompilerRunError) {
+			const {options, message: compilerMessage} = error as CompileError				
+			$.log($.colors.bold("Failed to compile"), $.colors.bgRed(options.inFile), $.colors.bgBlack(compilerMessage))
+		}
+
+		return
+	}
+	
 	if (type === LogItemType.Info) {
 		$.log($.colors.bgBlack(logger.fullName), message)
 	} else if (type === LogItemType.Warning) {
@@ -77,32 +104,6 @@ export function formatLog(logger: Logger, {type, message, error}: LogItem) {
 	} else if (type === LogItemType.Error) {
 		$.log($.colors.bgRed(logger.fullName), message)
 	} else {
-		if (error.kind) {
-			if (error.kind === CompilerErrorType.CompileError) {
-				const {files, options} = error as CompileError
-				for (const file in files) {
-					if (!error.files.hasOwnProperty(file))
-						continue
-					
-					const errors = files[file]
-					for (const errorItem of errors) {
-						$.log(
-							$.colors.bold("Error in"), 
-							$.colors.bgRed(file), 
-							$.colors.bold(`(${errorItem.line}):`), 
-							$.colors.cyan(errorItem.code), 
-							$.colors.bgBlack(errorItem.message))
-					}
-				}
-		
-				throw new $.PluginError("miva", `Failed to compile ${error.options.inFile}!`)
-			} else if (error.kind === CompilerErrorType.CompilerRunError) {
-				const {options, message: compilerMessage} = error as CompileError				
-				$.log($.colors.bold("Failed to compile"), $.colors.bgRed(options.inFile), $.colors.bgBlack(compilerMessage))
-				throw new $.PluginError("miva", `Failed to compile ${options.inFile}!`)
-			}		
-		}
-		
 		$.log(logger.fullName, message)
 	}
 }
