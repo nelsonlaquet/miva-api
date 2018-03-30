@@ -7,7 +7,8 @@ export interface CompilerOptions {
 	inFile: string
 	outFile: string
 	builtinsDir: string
-	cwd: string
+	cwd: string,
+	defines: string[]
 }
 
 export enum CompilerErrorType {
@@ -64,13 +65,13 @@ export class MivaCompiler {
 	}
 	
 	public async compile(options: CompilerOptions) {
-		const {inFile, outFile, builtinsDir, cwd} = options
+		const {inFile, outFile, builtinsDir, cwd, defines} = options
 		return new Promise((resolve, reject) => {
 			const outDir = join(cwd || "./", dirname(outFile))
 			this._logger.info(`Creating directory ${outDir}...`)
 			mkdir("-p", dirname(join(cwd || "./", outFile)))
 
-			const command = `mvc -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`
+			const command = `mvc ${defines ? defines.map(symbol => `-D ${symbol}`).join(" ") : ""} -o ${outFile} ${builtinsDir ? `-B ${builtinsDir}` : ""} ${inFile}`
 			this._logger.info(`Running "${command}" in "${cwd || "./"}"...`)
 			exec(command,
 				{
