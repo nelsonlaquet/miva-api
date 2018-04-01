@@ -1,5 +1,5 @@
 import $ from "./optional/gulp-util"
-import {CompileError, CompilerErrorType} from "./compiler"
+import {CompileError, CompilerErrorType} from "./types"
 
 export enum LogItemType {
 	Info,

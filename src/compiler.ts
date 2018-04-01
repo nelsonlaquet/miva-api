@@ -2,41 +2,7 @@ import {exec} from "child_process"
 import {mkdir} from "shelljs"
 import {dirname, join} from "path"
 import {Logger} from "./logger"
-
-export interface CompilerOptions {
-	inFile: string
-	outFile: string
-	builtinsDir: string
-	cwd: string,
-	defines: string[]
-}
-
-export enum CompilerErrorType {
-	CompilerRunError,
-	CompileError
-}
-
-export interface CompilerRunError {
-	kind: CompilerErrorType.CompilerRunError
-	options: CompilerOptions
-	message: string
-}
-
-export interface CompileError {
-	kind: CompilerErrorType.CompileError
-	options: CompilerOptions
-	files: CompileFiles
-	message: string
-}
-
-export interface CompileFiles {[file: string]: CompileErrorMessage[]}
-
-export interface CompileErrorMessage {
-	file: string
-	line: number
-	message: string
-	code: string
-}
+import {CompileFiles, CompilerOptions, CompilerErrorType, CompileError} from "./types"
 
 const MivaCompilerErrorRegex = /(.*)?\:(\d+): (\w+): (.+?)$/gm
 export function parseMivaCompilerErrors(compilerOutput: string): CompileFiles {

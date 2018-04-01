@@ -1,9 +1,14 @@
 import { Config } from "./config"
-import {CookieJar, RequestAPI} from "request"
+import {CookieJar, RequestAPI, RequestCallback, Response} from "request"
 import * as request from "request-promise-native"
 import { Logger, LogItem, LogItemType } from "./logger"
 import { createReadStream } from "fs"
 import { basename } from "path"
+
+export interface JsonResponse<TResult> {
+	success: boolean,
+	data: TResult
+}
 
 export class MivaAdmin {
 	public get logger() { return this._logger }
@@ -12,11 +17,14 @@ export class MivaAdmin {
 	private _loggerSignIn: Logger
 	private _loggerUpload: Logger
 	private _request: RequestAPI<any, any, any>
+	private _sessionId?: string
+	private _config: Config
 	
 	constructor(
-		private _config: Config,
+		config: Config,
 		logger: Logger | null = null
 	) {
+		this._config = config
 		this._logger = logger || new Logger("Miva Admin")
 		this._loggerSignIn = this._logger.createLogger("Sign In")
 		this._loggerUpload = this._logger.createLogger("Module Upload")
@@ -25,6 +33,10 @@ export class MivaAdmin {
 			followAllRedirects: true,
 			followRedirect: true
 		})
+	}
+
+	public setSessionId(sessionId: string) {
+		this._sessionId = sessionId
 	}
 
 	public async uploadModule(moduleCode: string, modulePath: string): Promise<any> {
@@ -58,7 +70,7 @@ export class MivaAdmin {
 			this._loggerUpload.error(`Could not upload module ${moduleCode}: ${errorMatch[1]}`)
 			throw new Error(`Could not upload module ${moduleCode}: ${errorMatch[1]}`)
 		}
-			
+
 		if (body.indexOf("Sign In") !== -1) {
 			this._loggerUpload.warn("You were signed out!")
 			throw new Error("You were signed out!")
@@ -99,8 +111,12 @@ export class MivaAdmin {
 		this._loggerUpload.info(`Updated ${moduleCode}!`)
 	}
 
-	private _doRequest(path: string, querystring: {[name: string]: string}, form: any) {
-		const queryStringParts = ["temporarysession=1"]
+	public async json<ResponseType>(func: string, querystring?: {[name: string]: string}, form?: any): Promise<JsonResponse<ResponseType>> {
+		return JSON.parse(await this._doRequest(`/mm5/json.mvc?Function=${func}`, querystring || {}, form || {})) as JsonResponse<ResponseType>
+	}
+
+	private _doRequest(path: string, querystring: {[name: string]: string}, form: any): Promise<string> {
+		const queryStringParts = this._sessionId ? [] : ["temporarysession=1"]
 		for (const queryName in querystring) {
 			if (!querystring.hasOwnProperty(queryName))
 				continue
@@ -114,20 +130,20 @@ export class MivaAdmin {
 		return this._request.post({
 			url,
 			formData: {
-				UserName: this._config.username,
-				Password: this._config.password,
-				Store_Code: this._config.storeCode,
 				Session_Type: "admin",
+				...(this._sessionId ? {
+					Session_ID: this._sessionId
+				} : {
+					UserName: this._config.username,
+					Password: this._config.password
+				}),
+				Store_Code: this._config.storeCode,
 				...form
 			}
 		})
 	}
 
-	private _doAdminRequest(path: string, querystring: {[name: string]: string}, form: any) {
+	private _doAdminRequest(path: string, querystring: {[name: string]: string}, form: any): Promise<string> {
 		return this._doRequest(`/mm5/admin.mvc${path}`, querystring, form)
-	}
-
-	private _doJsonRequest(func: string, querystring: {[name: string]: string}, form: any) {
-		return this._doRequest(`/mm5/json.mvc?Function=${func}`, querystring, form)
 	}
 }
