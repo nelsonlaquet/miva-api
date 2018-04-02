@@ -9,12 +9,18 @@
         "strictNullChecks": true,
         "strict": true,
         "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
         "lib": [
             "es6"
         ],
         "sourceMap": true,
         "outDir": "bin",
-        "rootDir": "src"
+        "rootDir": "src",
+        "baseUrl": ".",
+        "typeRoots": [
+            "node_modules/@types",
+            "manual_typings"
+        ]
     },
     "include": [
         "src/**/*.ts"

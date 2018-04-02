@@ -24,6 +24,16 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/lodash-es@^4.17.0":
+  version "4.17.0"
+  resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.17.0.tgz#ed9044d62ee36a93e0650b112701986b1c74c766"
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*", "@types/lodash@^4.14.106":
+  version "4.14.106"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.106.tgz#6093e9a02aa567ddecfe9afadca89e53e5dce4dd"
+
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -327,6 +337,10 @@ lodash.templatesettings@^3.0.0:
   dependencies:
     lodash._reinterpolate "^3.0.0"
     lodash.escape "^3.0.0"
+
+lodash@^4.17.5:
+  version "4.17.5"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
 
 mime-db@~1.33.0:
   version "1.33.0"

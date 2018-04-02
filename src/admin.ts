@@ -2,8 +2,9 @@ import { Config } from "./config"
 import { Logger, LogItem, LogItemType } from "./logger"
 import { createReadStream } from "fs"
 import { basename } from "path"
-import fetch, {Response} from "node-fetch"
+import fetch, { Response } from "node-fetch"
 import * as FormData from "form-data"
+import map from "lodash/map"
 
 export interface JsonResponse<TResult> {
 	success: boolean,
@@ -14,7 +15,7 @@ export interface JsonResponse<TResult> {
 
 export class MivaAdmin {
 	private static _adminPath = "/mm5/admin.mvc"
-	
+
 	public get logger() { return this._logger }
 
 	private _logger: Logger
@@ -54,7 +55,7 @@ export class MivaAdmin {
 		form.append("GeneratedImage_Width", "")
 		form.append("GeneratedImage_Height", "")
 		form.append("FileUpload_File", createReadStream(modulePath), {
-			filename: basename(modulePath), 
+			filename: basename(modulePath),
 			contentType: "application/octet-stream"
 		})
 		const response = await this._postForm(MivaAdmin._adminPath, {}, form)
@@ -95,7 +96,7 @@ export class MivaAdmin {
 		form.append("Module_Module", `modules/util/${basename(modulePath)}`)
 		const response = await this._postForm(MivaAdmin._adminPath, {}, form)
 		const body = await response.text()
-	
+
 		if (body.indexOf("Sign In") !== -1) {
 			this._loggerUpload.warn("You were signed out!")
 			throw new Error("You were signed out!")
@@ -104,10 +105,10 @@ export class MivaAdmin {
 		this._loggerUpload.info(`Updated ${moduleCode}!`)
 	}
 
-	public async getJson<ResponseType>(func: string, querystring?: {[name: string]: string}): Promise<JsonResponse<ResponseType>> {
+	public async json<ResponseType>(func: string, querystring?: { [name: string]: string }, form?: { [name: string]: string }): Promise<JsonResponse<ResponseType>> {
 		const url = this._buildUrl(`/mm5/json.mvc`, {
-			...querystring, 
-			Store_Code: this._config.storeCode, 
+			...querystring,
+			Store_Code: this._config.storeCode,
 			Function: func,
 			Session_Type: "admin"
 		})
@@ -118,29 +119,33 @@ export class MivaAdmin {
 				"Content-Type": "application/x-www-form-urlencoded"
 			},
 			credentials: "same-origin",
-			body: `Session_Id=${this._sessionId}`
+			body: toUrlEncoded({
+				...(form || {}),
+				...(this._sessionId ? {Session_Id: this._sessionId} : {})
+			})
 		} as any)
 
 		const jsonResponse = await result.json()
 		return jsonResponse as JsonResponse<ResponseType>
 	}
 
-	public async getModuleJson<ResponseType>(moduleCode: string, func: string, querystring?: {[name: string]: string}): Promise<JsonResponse<ResponseType>> {
-		return this.getJson<ResponseType>("Module", {
-			Module_Code: moduleCode, 
+	public async moduleJson<ResponseType>(moduleCode: string, func: string, querystring?: { [name: string]: string }, form?: { [name: string]: string }): Promise<JsonResponse<ResponseType>> {
+		return this.json<ResponseType>("Module", {
+			...(querystring || {}),
+			Module_Code: moduleCode,
 			Module_Function: func,
 			Session_Type: "admin"
-		})
+		}, form)
 	}
 
-	private _postForm(path: string, querystring: {[name: string]: string}, form: FormData): Promise<Response> {
+	private _postForm(path: string, querystring: { [name: string]: string }, form: FormData): Promise<Response> {
 		const url = this._buildUrl(path, querystring)
 
 		if (!this._sessionId) {
 			form.append("Username", this._config.username)
 			form.append("Password", this._config.password)
 		}
-		
+
 		this._logger.info(`POST: '${url}' with keys ${Object.keys(form)}`)
 
 		return fetch(url, {
@@ -149,7 +154,7 @@ export class MivaAdmin {
 		})
 	}
 
-	private _buildUrl(url: string, querystring: {[name: string]: any}) {
+	private _buildUrl(url: string, querystring: { [name: string]: any }) {
 		const queryStringParts = this._sessionId ? [] : ["temporarysession=1"]
 		for (const queryName in querystring) {
 			if (!querystring.hasOwnProperty(queryName))
@@ -158,9 +163,13 @@ export class MivaAdmin {
 			const queryValue = querystring[queryName]
 			queryStringParts.push(`${queryName}=${encodeURIComponent(queryValue)}`)
 		}
-		
+
 		return url.startsWith("http://") || url.startsWith("https://")
 			? `${url}${url.indexOf("?") === -1 ? "?" : ""}${queryStringParts.join("&")}`
 			: `${this._config.storeUrl}${url}${url.indexOf("?") === -1 ? "?" : ""}${queryStringParts.join("&")}`
 	}
+}
+
+function toUrlEncoded(form: { [name: string]: string }) {
+	return map(form, (value, key) => `${encodeURIComponent(value)}=${encodeURIComponent(key)}`).join("&")
 }
