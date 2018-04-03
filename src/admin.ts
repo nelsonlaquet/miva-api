@@ -4,7 +4,8 @@ import { createReadStream } from "fs"
 import { basename } from "path"
 import fetch, { Response } from "node-fetch"
 import * as FormData from "form-data"
-import map from "lodash/map"
+
+const map = require("lodash/map")
 
 export interface JsonResponse<TResult> {
 	success: boolean,
@@ -110,7 +111,8 @@ export class MivaAdmin {
 			...querystring,
 			Store_Code: this._config.storeCode,
 			Function: func,
-			Session_Type: "admin"
+			Session_Type: "admin",
+			r: Math.floor(Math.random() * 1000)
 		})
 
 		const result = await fetch(url, {
@@ -171,5 +173,5 @@ export class MivaAdmin {
 }
 
 function toUrlEncoded(form: { [name: string]: string }) {
-	return map(form, (value, key) => `${encodeURIComponent(value)}=${encodeURIComponent(key)}`).join("&")
+	return map(form, (value: any, key: any) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&")
 }
