@@ -1,7 +1,7 @@
 import { Config } from "./config"
 import { Logger, LogItem, LogItemType } from "./logger"
 import { createReadStream } from "fs"
-import { basename } from "path"
+import { basename, dirname } from "path"
 import fetch, { Response } from "node-fetch"
 import * as FormData from "form-data"
 
@@ -41,25 +41,29 @@ export class MivaAdmin {
 
 	public async uploadModule(moduleCode: string, modulePath: string): Promise<any> {
 		this._loggerUpload.info(`Uploading ${modulePath} to ${moduleCode}...`)
+		
 		const form = new FormData()
+		form.append("Session_Type", "admin")
+		form.append("Username", this._config.username)
+		form.append("Password", this._config.password)
+		
 		form.append("Screen", "FUPL")
 		form.append("Action", "FUPL")
 		form.append("Tab", "")
 		form.append("Have_Fields", "")
-		form.append("Store_Code", this._config.storeCode)
 		form.append("FileUpload_Form", "MODS")
 		form.append("FileUpload_Field", "Module_Module")
 		form.append("FileUpload_Type", "Module")
 		form.append("FileUpload_Data", moduleCode)
 		form.append("FileUpload_Overwrite", "Yes")
-		form.append("mm9_imagepicker_imagepath_path_input", "")
-		form.append("GeneratedImage_Width", "")
-		form.append("GeneratedImage_Height", "")
 		form.append("FileUpload_File", createReadStream(modulePath), {
 			filename: basename(modulePath),
 			contentType: "application/octet-stream"
 		})
-		const response = await this._postForm(MivaAdmin._adminPath, {}, form)
+		form.append("mm9_imagepicker_imagepath_path_input", "")
+		form.append("GeneratedImage_Width", "")
+		form.append("GeneratedImage_Height", "")
+		const response = await this._postForm(MivaAdmin._adminPath, {}, form, false)
 		const body = await response.text()
 
 		const errorMatch = /onload="FieldError\(.*?'\w+', '(.*?)'/.exec(body)
@@ -140,15 +144,16 @@ export class MivaAdmin {
 		}, form)
 	}
 
-	private _postForm(path: string, querystring: { [name: string]: string }, form: FormData): Promise<Response> {
+	private _postForm(path: string, querystring: { [name: string]: string }, form: FormData, provideCredentials: boolean = true): Promise<Response> {
 		const url = this._buildUrl(path, querystring)
 
-		if (!this._sessionId) {
+		if (!this._sessionId && provideCredentials) {
 			form.append("Username", this._config.username)
 			form.append("Password", this._config.password)
+			form.append("Session_Type", "admin");
 		}
 
-		this._logger.info(`POST: '${url}' with keys ${Object.keys(form)}`)
+		this._logger.info(`POST: '${url}'`)
 
 		return fetch(url, {
 			method: "POST",
