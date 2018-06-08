@@ -58,7 +58,7 @@ export default class MivaCompiler {
 							}
 
 							this._logger.error(`Could not compile ${inFile}!`, errorData)
-							reject(errorData)
+							reject(new Error(out))
 						} else {
 							// there was no output, so the compiler failed to run
 							const errorData = {
@@ -68,7 +68,7 @@ export default class MivaCompiler {
 							}
 
 							this._logger.error(`Could not compile ${inFile}!`, errorData)
-							reject(errorData)
+							reject(new Error(out))
 						}
 
 						return

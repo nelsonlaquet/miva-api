@@ -1,7 +1,7 @@
 import Config from "./config"
 import { Logger, LogItem, LogItemType } from "./logger"
 import { createReadStream } from "fs"
-import { basename } from "path"
+import { basename, dirname } from "path"
 import fetch, { Response } from "node-fetch"
 import * as FormData from "form-data"
 

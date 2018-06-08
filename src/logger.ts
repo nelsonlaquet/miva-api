@@ -89,12 +89,12 @@ export function formatLog(logger: Logger, {type, message, error}: LogItem) {
 			}
 	
 			$.log($.colors.bold("Failed to compile"), $.colors.bgRed(options.inFile), $.colors.bgBlack(message))
+			return
 		} else if (error.kind === CompilerErrorType.CompilerRunError) {
 			const {options, message: compilerMessage} = error as CompileError				
 			$.log($.colors.bold("Failed to compile"), $.colors.bgRed(options.inFile), $.colors.bgBlack(compilerMessage))
+			return
 		}
-
-		return
 	}
 	
 	if (type === LogItemType.Info) {
