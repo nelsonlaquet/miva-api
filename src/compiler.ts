@@ -23,11 +23,11 @@ export function parseMivaCompilerErrors(compilerOutput: string): CompileFiles {
 	return retVal
 }
 
-export class MivaCompiler {
+export default class MivaCompiler {
 	private readonly _logger: Logger
 	
 	public constructor(logger: Logger)  {
-		this._logger = logger.createLogger("MivaCompiler")
+		this._logger = logger
 	}
 	
 	public async compile(options: CompilerOptions) {

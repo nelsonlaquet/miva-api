@@ -1,5 +1,7 @@
 import {readFileSync, existsSync, readSync} from "fs"
 
+const isNil = require("lodash/isNil")
+
 export interface ConfigOptions {
 	username: string
 	password: string
@@ -8,43 +10,36 @@ export interface ConfigOptions {
 	jsonUrl: string
 }
 
-export class Config {
-	public get username() { return this._username }
-	public get password() { return this._password }
-	public get storeUrl() { return this._storeUrl }
-	public get storeCode() { return this._storeCode }
-	public get jsonUrl() { return this._jsonUrl }
-
-	private _username: string
-	private _password: string
-	private _storeUrl: string
-	private _storeCode: string
-	private _jsonUrl: string
+export default class Config {
+	public get values() { return this._config }
+	private _config: ConfigOptions
 
 	public constructor(config: Partial<ConfigOptions>) {
-		this._username = ""
-		this._password = ""
-		this._storeUrl = ""
-		this._storeCode = "1111"
-		this._jsonUrl = ""
+		this._config = {
+			username: "",
+			password: "",
+			storeUrl: "",
+			storeCode: "",
+			jsonUrl: ""
+		}
+		
 		this.addObject(config)
 	}
 
 	public addEnv(prefix: string = "") {
-		this._username = process.env[prefix + "USERNAME"] || this._username
-		this._password = process.env[prefix + "PASSWORD"] || this._password
-		this._storeUrl = process.env[prefix + "STORE_URL"] || this._storeUrl
-		this._storeCode = process.env[prefix + "STORE_CODE"] || this._storeCode
-		this._jsonUrl = process.env[prefix + "JSON_URL"] || this._jsonUrl
+		this.addObject({
+			username: process.env[prefix + "USERNAME"],
+			password: process.env[prefix + "PASSWORD"],
+			storeUrl: process.env[prefix + "STORE_URL"],
+			storeCode: process.env[prefix + "STORE_CODE"],
+			jsonUrl: process.env[prefix + "JSON_URL"]
+		})
+
 		return this
 	}
 
-	public addObject({username, password, storeUrl, storeCode, jsonUrl}: Partial<ConfigOptions> = {}) {
-		this._username = username || this._username
-		this._password = password || this._password
-		this._storeUrl = storeUrl || this._storeUrl
-		this._storeCode = storeCode || this._storeCode
-		this._jsonUrl = jsonUrl || this._jsonUrl
+	public addObject(options: Partial<ConfigOptions> = {}) {
+		this._config = {...this._config, ...options}
 		return this
 	}
 
