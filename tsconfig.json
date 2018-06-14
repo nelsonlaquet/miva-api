@@ -14,7 +14,7 @@
             "es6"
         ],
         "sourceMap": true,
-        "outDir": "bin",
+        "outDir": "lib",
         "rootDir": "src",
         "baseUrl": ".",
         "typeRoots": [
