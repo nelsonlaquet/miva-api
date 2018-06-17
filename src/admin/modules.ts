@@ -5,23 +5,28 @@ import MivaAdmin, {MivaResponse} from "../admin"
 
 export async function upload(admin: MivaAdmin, moduleCode: string, modulePath: string): Promise<MivaResponse<any>> {
 	const form = new FormData()
-	form.append("Screen", "FUPL")
+	form.append("Username", admin.config.values.username)
+	form.append("Password", admin.config.values.password)
+	form.append("Session_Type", "admin")
+
+	form.append("Screen", "FUPL")	
 	form.append("Action", "FUPL")
 	form.append("Tab", "")
 	form.append("Have_Fields", "")
-	form.append("Store_Code", admin.config.values.storeCode)
 	form.append("FileUpload_Form", "MODS")
 	form.append("FileUpload_Field", "Module_Module")
+	form.append("FileUpload_Path", `modules/util/${basename(modulePath)}`)
 	form.append("FileUpload_Type", "Module")
 	form.append("FileUpload_Data", moduleCode)
 	form.append("FileUpload_Overwrite", "Yes")
-	form.append("mm9_imagepicker_imagepath_path_input", "")
-	form.append("GeneratedImage_Width", "")
-	form.append("GeneratedImage_Height", "")
 	form.append("FileUpload_File", createReadStream(modulePath), {
 		filename: basename(modulePath),
 		contentType: "application/octet-stream"
 	})
+	
+	form.append("mm9_imagepicker_imagepath_path_input", "")
+	form.append("GeneratedImage_Width", "")
+	form.append("GeneratedImage_Height", "")
 
 	const response = await admin.post(MivaAdmin.ADMIN_PATH, form)
 	if (!response.success) {

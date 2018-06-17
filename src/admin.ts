@@ -69,11 +69,14 @@ export default class MivaAdmin {
 		})
 	}
 
-	public async post(path: string, form: FormData = new FormData()): Promise<MivaResponse<string>> {
+	public async post(path: string, form: FormData = new FormData(), provideCredentials = true): Promise<MivaResponse<string>> {
 		const url = this._buildUrl(path)
-		form.append("Session_Type", "admin")
-		form.append("Username", this._config.values.username)
-		form.append("Password", this._config.values.password)
+
+		if (provideCredentials) {
+			form.append("Username", this._config.values.username)
+			form.append("Password", this._config.values.password)
+			form.append("Session_Type", "admin")
+		}
 
 		this._logger.info(`POST: "${url}"`)
 		const response = await fetch(url, {
