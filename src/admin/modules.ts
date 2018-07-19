@@ -27,7 +27,7 @@ export async function upload(admin: MivaAdmin, moduleCode: string, modulePath: s
 	form.append("GeneratedImage_Width", "")
 	form.append("GeneratedImage_Height", "")
 
-	const response = await admin.post(MivaAdmin.ADMIN_PATH, form)
+	const response = await admin.post(MivaAdmin.ADMIN_PATH, form, false)
 	if (!response.success) {
 		admin.logger.error(`Could not upload module "${moduleCode}": ${response.error_message}`)
 		return response
