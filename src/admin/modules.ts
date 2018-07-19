@@ -5,9 +5,9 @@ import MivaAdmin, {MivaResponse} from "../admin"
 
 export async function upload(admin: MivaAdmin, moduleCode: string, modulePath: string): Promise<MivaResponse<any>> {
 	const form = new FormData()
+	form.append("Session_Type", "admin")
 	form.append("Username", admin.config.values.username)
 	form.append("Password", admin.config.values.password)
-	form.append("Session_Type", "admin")
 
 	form.append("Screen", "FUPL")	
 	form.append("Action", "FUPL")
@@ -15,10 +15,10 @@ export async function upload(admin: MivaAdmin, moduleCode: string, modulePath: s
 	form.append("Have_Fields", "")
 	form.append("FileUpload_Form", "MODS")
 	form.append("FileUpload_Field", "Module_Module")
-	form.append("FileUpload_Path", `modules/util/${basename(modulePath)}`)
 	form.append("FileUpload_Type", "Module")
 	form.append("FileUpload_Data", moduleCode)
 	form.append("FileUpload_Overwrite", "Yes")
+	form.append("FileUpload_Path", `modules/util/${basename(modulePath)}`)
 	form.append("FileUpload_File", createReadStream(modulePath), {
 		filename: basename(modulePath),
 		contentType: "application/octet-stream"
