@@ -18,7 +18,6 @@ export async function upload(admin: MivaAdmin, moduleCode: string, modulePath: s
 	form.append("FileUpload_Type", "Module")
 	form.append("FileUpload_Data", moduleCode)
 	form.append("FileUpload_Overwrite", "Yes")
-	form.append("FileUpload_Path", `modules/util/${basename(modulePath)}`)
 	form.append("FileUpload_File", createReadStream(modulePath), {
 		filename: basename(modulePath),
 		contentType: "application/octet-stream"
