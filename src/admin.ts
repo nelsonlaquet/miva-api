@@ -8,26 +8,27 @@ import * as FormData from "form-data"
 const map = require("lodash/map")
 
 export interface MivaResponse<TResult> {
-	success: boolean,
-	data: TResult,
+	success: boolean
+	data: TResult
 	error_code?: string
 	error_message?: string
 }
 
 export default class MivaAdmin {
 	public static ADMIN_PATH = "/mm5/admin.mvc"
-	
-	public get logger() { return this._logger }
-	public get config() { return this._config }
+
+	public get logger() {
+		return this._logger
+	}
+	public get config() {
+		return this._config
+	}
 
 	private _logger: Logger
 	private _sessionId?: string
 	private _config: Config
 
-	constructor(
-		config: Config,
-		logger: Logger | null = null
-	) {
+	constructor(config: Config, logger: Logger | null = null) {
 		this._config = config
 		this._logger = logger || new Logger("Miva Admin")
 	}
@@ -36,7 +37,38 @@ export default class MivaAdmin {
 		this._sessionId = sessionId
 	}
 
-	public async json<ResponseType>(func: string, form?: { [name: string]: string }): Promise<MivaResponse<ResponseType>> {
+	public async moduleFile<ResponseType>(
+		func: string,
+		module: string,
+		params: { [name: string]: any } = {},
+		form: FormData = new FormData()
+	): Promise<MivaResponse<ResponseType>> {
+		const url = this._buildUrl(`/mm5/json.mvc`, {
+			Store_Code: this._config.values.storeCode,
+			Function: "Module",
+			Module_Code: module,
+			Module_Function: func,
+			MivaToken: this._config.values.token,
+			r: Math.floor(Math.random() * 1000),
+			...params
+		})
+
+		const result = await fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "multipart/form-data"
+			},
+			credentials: "same-origin",
+			body: form
+		} as any)
+
+		return (await result.json()) as MivaResponse<ResponseType>
+	}
+
+	public async json<ResponseType>(
+		func: string,
+		form?: { [name: string]: string }
+	): Promise<MivaResponse<ResponseType>> {
 		const url = this._buildUrl(`/mm5/json.mvc`, {
 			Store_Code: this._config.values.storeCode,
 			Function: func,
@@ -52,7 +84,7 @@ export default class MivaAdmin {
 			credentials: "same-origin",
 			body: toUrlEncoded({
 				...(form || {}),
-				...(this._sessionId ? {Session_Id: this._sessionId} : {})
+				...(this._sessionId ? { Session_Id: this._sessionId } : {})
 			})
 		} as any)
 
@@ -60,7 +92,11 @@ export default class MivaAdmin {
 		return jsonResponse as MivaResponse<ResponseType>
 	}
 
-	public async moduleJson<ResponseType>(moduleCode: string, func: string, form?: { [name: string]: string }): Promise<MivaResponse<ResponseType>> {
+	public async moduleJson<ResponseType>(
+		moduleCode: string,
+		func: string,
+		form?: { [name: string]: string }
+	): Promise<MivaResponse<ResponseType>> {
 		return this.json<ResponseType>("Module", {
 			Module_Code: moduleCode,
 			Module_Function: func,
@@ -69,7 +105,11 @@ export default class MivaAdmin {
 		})
 	}
 
-	public async post(path: string, form: FormData = new FormData(), provideCredentials = true): Promise<MivaResponse<string>> {
+	public async post(
+		path: string,
+		form: FormData = new FormData(),
+		provideCredentials = true
+	): Promise<MivaResponse<string>> {
 		const url = this._buildUrl(path)
 
 		if (provideCredentials) {
@@ -83,14 +123,26 @@ export default class MivaAdmin {
 			method: "POST",
 			body: form
 		})
-		
-		this._logger.info(`POST: "${url}" (${response.status} / ${response.statusText})`)
+
+		this._logger.info(
+			`POST: "${url}" (${response.status} / ${response.statusText})`
+		)
 		const body = await response.text()
 
 		if (body.indexOf("Sign In") !== -1)
-			return { success: false, data: body, error_code: "miva-api/admin", error_message: "You were signed out!" }
+			return {
+				success: false,
+				data: body,
+				error_code: "miva-api/admin",
+				error_message: "You were signed out!"
+			}
 		else if (/Insufficient Concurrent User Licenses/.test(body))
-			return { success: false, data: body, error_code: "miva-api/admin", error_message: "Insufficient Concurrent User Licenses" }
+			return {
+				success: false,
+				data: body,
+				error_code: "miva-api/admin",
+				error_message: "Insufficient Concurrent User Licenses"
+			}
 
 		return { success: true, data: body }
 	}
@@ -98,19 +150,28 @@ export default class MivaAdmin {
 	private _buildUrl(url: string, querystring: { [name: string]: any } = {}) {
 		const queryStringParts = this._sessionId ? [] : ["temporarysession=1"]
 		for (const queryName in querystring) {
-			if (!querystring.hasOwnProperty(queryName))
-				continue
+			if (!querystring.hasOwnProperty(queryName)) continue
 
 			const queryValue = querystring[queryName]
-			queryStringParts.push(`${queryName}=${encodeURIComponent(queryValue)}`)
+			queryStringParts.push(
+				`${queryName}=${encodeURIComponent(queryValue)}`
+			)
 		}
 
 		return url.startsWith("http://") || url.startsWith("https://")
-			? `${url}${url.indexOf("?") === -1 ? "?" : ""}${queryStringParts.join("&")}`
-			: `${this._config.values.storeUrl}${url}${url.indexOf("?") === -1 ? "?" : ""}${queryStringParts.join("&")}`
+			? `${url}${
+					url.indexOf("?") === -1 ? "?" : ""
+			  }${queryStringParts.join("&")}`
+			: `${this._config.values.storeUrl}${url}${
+					url.indexOf("?") === -1 ? "?" : ""
+			  }${queryStringParts.join("&")}`
 	}
 }
 
 function toUrlEncoded(form: { [name: string]: string }) {
-	return map(form, (value: any, key: any) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&")
+	return map(
+		form,
+		(value: any, key: any) =>
+			`${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+	).join("&")
 }

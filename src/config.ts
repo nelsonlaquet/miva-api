@@ -1,8 +1,9 @@
-import {readFileSync, existsSync, readSync} from "fs"
+import { readFileSync, existsSync, readSync } from "fs"
 
 const isNil = require("lodash/isNil")
 
 export interface ConfigOptions {
+	token: string
 	username: string
 	password: string
 	storeUrl: string
@@ -11,23 +12,27 @@ export interface ConfigOptions {
 }
 
 export default class Config {
-	public get values() { return this._config }
+	public get values() {
+		return this._config
+	}
 	private _config: ConfigOptions
 
 	public constructor(config: Partial<ConfigOptions>) {
 		this._config = {
+			token: "",
 			username: "",
 			password: "",
 			storeUrl: "",
 			storeCode: "",
 			jsonUrl: ""
 		}
-		
+
 		this.addObject(config)
 	}
 
 	public addEnv(prefix: string = "") {
 		this.addObject({
+			token: process.env[prefix + "TOKEN"],
 			username: process.env[prefix + "USERNAME"],
 			password: process.env[prefix + "PASSWORD"],
 			storeUrl: process.env[prefix + "STORE_URL"],
@@ -39,18 +44,20 @@ export default class Config {
 	}
 
 	public addObject(options: Partial<ConfigOptions> = {}) {
-		this._config = {...this._config, ...options}
+		this._config = { ...this._config, ...options }
 		return this
 	}
 
 	public addFile(file: string, isRequired: boolean = true) {
 		if (!existsSync(file)) {
 			if (isRequired)
-				throw new Error(`Can't read from file "${file}, it doesn't exist!"`)
+				throw new Error(
+					`Can't read from file "${file}, it doesn't exist!"`
+				)
 
 			return this
 		}
-		
+
 		return this.addObject(JSON.parse(readFileSync(file).toString()))
 	}
 }
