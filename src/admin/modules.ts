@@ -11,13 +11,17 @@ export async function upload(
 	const form = new FormData()
 
 	form.append("FileUpload_File", createReadStream(modulePath), {
-		filename: basename(modulePath),
-		contentType: "application/octet-stream"
+		filename: basename(modulePath)
 	})
 
-	const response = await admin.moduleFile("UploadModule", "spocustom", {
-		TargetMokdule: moduleCode
-	})
+	const response = await admin.moduleFile(
+		"UploadModule",
+		"spocustom",
+		{
+			TargetModule: moduleCode
+		},
+		form
+	)
 	if (!response.success)
 		admin.logger.error(
 			`Uploaded module "${moduleCode}" failed: [${response.error_code}] ${
