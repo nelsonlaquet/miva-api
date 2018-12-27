@@ -55,9 +55,6 @@ export default class MivaAdmin {
 
 		const result = await fetch(url, {
 			method: "POST",
-			headers: {
-				"Content-Type": "multipart/form-data"
-			},
 			credentials: "same-origin",
 			body: form
 		} as any)
